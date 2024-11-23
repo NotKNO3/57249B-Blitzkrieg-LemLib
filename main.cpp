@@ -2,7 +2,7 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
 #include "pros/misc.h"
-#include "pros/motors.h"
+
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
@@ -146,7 +146,7 @@ void competition_initialize() {}
 // 7 - blue negative
 // 3 - red positive (mogo rush) (no sig wp)
 // 4 - red negative
-int chosenAuton = 2;
+int chosenAuton = 8;
 
 void autonomous() {
     // set position to x:0, y:0, heading:0
@@ -175,24 +175,29 @@ void autonomous() {
 			chassis.waitUntilDone();
 			clamp.set_value(false);
 			pros::delay(300);
+
 			// Get first ring (not match load) (bottom of 2 ring stack)
 			intake_motors.move(127);
-			chassis.moveToPose(-12, -25, 270, 1500, {.minSpeed = 30});
+			chassis.moveToPose(-15, -25, 270, 1500, {.minSpeed = 30}); //-12
+
 			// Get second ring (ring on bottom left of pile)
-			chassis.moveToPose(-10, -40, 180, 1500);
-			chassis.moveToPoint(-15, -25, 1500, {.forwards = false});
+			chassis.moveToPose(-10, -40, 180, 1500); //40
+			chassis.moveToPoint(-17, -25, 1500, {.forwards = false}); //-15
+
 			// Get third ring (ring on bottom right of pile)
-			chassis.moveToPose(-20, -43, 180, 1500);
+			chassis.moveToPose(-20, -43, 180, 1500); //47
+
 			// Go back and get fourth ring
 			chassis.moveToPoint(-20, 0, 1500, {.forwards = false});
 			intakeLift.set_value(true);
-			chassis.moveToPose(25, 0, 90, 1500);
-			pros::delay(300);
+			chassis.moveToPose(25, 0, 90, 1500); //move backwards to prep for grabbing fourth ring
+			pros::delay(200);
 			intakeLift.set_value(false);
-			// Hit ladder
+			// Hit ladders
 			chassis.moveToPose(20, -20, 0, 1500);
-			chassis.waitUntilDone();
+			//chassis.waitUntilDone();
 			intake_motors.move(0);
+            
 			break;
 		case 3:
 			// Red Positive
@@ -353,7 +358,63 @@ void autonomous() {
 			// // Hit ladder
 			// chassis.moveToPose(20, -20, 0, 1500);
 			// chassis.waitUntilDone();
-	}
+        case 8: //blue neg
+            // chassis.setPose(0, 0, 0);
+            //grab mogo
+            clamp.set_value(true);
+			chassis.moveToPoint(0, -25, 1500, {.forwards = false});
+			chassis.waitUntilDone();
+			clamp.set_value(false);
+			pros::delay(200);
+            // chassis.moveToPoint(0, -25, 1500, {.forwards = false, .maxSpeed = 60}); 
+			// //pros::delay(300);
+            // clamp.set_value(false);
+            // //first ring
+            chassis.turnToHeading(270, 1500);
+            chassis.waitUntilDone();
+            chassis.setPose(0, 0, 0);
+            intake_motors.move(200);
+            //second ring
+            //chassis.turnToHeading(270, 1500);
+            chassis.moveToPoint(0, 25, 1500, {.forwards = true}); //24 but we move more so that it is in line with getting the second ring
+            intake_motors.move(0);
+
+            //sophia and jake code from case 2 
+            // Get third ring (ring on bottom right of pile)
+        
+            /**chassis.setPose(0,0,0);
+            intake_motors.move(127);
+            chassis.moveToPoint(0, 20, 1500);//
+            chassis.turnToHeading(20, 1500);
+            chassis.moveToPoint(0, -15, 1500);
+            intake_motors.move(0);
+            chassis.setPose(0,0,0);
+            chassis.turnToHeading(200, 1500);
+            chassis.moveToPoint(0, 30, 1500);
+
+            chassis.moveToPose(-20, -43, 180, 1500);
+			// Go back and get fourth ring
+			chassis.moveToPoint(-20, 0, 1500, {.forwards = false});
+			intakeLift.set_value(true);
+			chassis.moveToPose(25, 0, 90, 1500);
+			pros::delay(300);
+			intakeLift.set_value(false);
+			// Hit ladder
+			chassis.moveToPose(20, -20, 0, 1500);
+			chassis.waitUntilDone();
+			intake_motors.move(0);
+           
+            /**
+            chassis.turnToHeading(270, 1500);
+            chassis.setPose(0,0,0);
+            intake_motors.move(125);
+            chassis.moveToPoint(0, 25, 1500);
+            chassis.moveToPoint(0, -30, 1500);
+            chassis.turnToHeading(30, 1500);
+            chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 60});
+*/
+            break;
+    }
 }
 
 /**
